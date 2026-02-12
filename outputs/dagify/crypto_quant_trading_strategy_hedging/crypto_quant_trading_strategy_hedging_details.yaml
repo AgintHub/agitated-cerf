@@ -1,6 +1,6 @@
 dag_type: plain_text
-description: Generated workflow from UI for cryptocurrency quantitative trading strategy
-  with hedging capabilities.
+description: Workflow to implement a hedged crypto trading strategy using Tether as
+  the hedging instrument
 name: crypto_quant_trading_strategy_hedging
 nodes:
   backtest_strategy:
@@ -21,13 +21,13 @@ nodes:
     nodes_depended_on:
     - identify_trending_coins
     nodes_dependent_on:
-    - backtest_strategy
     - hedge_strategy
+    - backtest_strategy
     prompt: Using the trending coins identified, develop a trading strategy that leverages
       these trends. Establish buy and sell criteria, and leverage any market anomalies.
   download_historical_prices:
     agent: false
-    description: Retrive historical price data for BTC, stable and ETH
+    description: Retrieve historical price data for BTC, stable and ETH
     name: download_historical_prices
     nodes_depended_on:
     - gather_data
@@ -37,7 +37,7 @@ nodes:
       data for BTC, stable and ETH.
   download_historical_volumes:
     agent: false
-    description: Retrive historical volume data for BTC, stable and ETH
+    description: Retrieve historical volume data for BTC, stable and ETH
     name: download_historical_volumes
     nodes_depended_on:
     - gather_data
@@ -57,14 +57,15 @@ nodes:
       a reputable data source such as CoinMarketCap or Quandl.
   hedge_strategy:
     agent: false
-    description: Develop a hedging strategy to mitigate potential losses
+    description: Develop a Tether-based hedging strategy to mitigate losses
     name: hedge_strategy
     nodes_depended_on:
     - develop_trading_strategy
     nodes_dependent_on:
     - launch_strategy
-    prompt: Develop a hedging strategy to mitigate potential losses. Identify appropriate
-      hedge instruments and positions to balance the portfolio.
+    prompt: Develop a hedging strategy using Tether (USDT) as the primary hedging
+      instrument. Calculate optimal hedging ratios, define entry/exit conditions,
+      and structure the portfolio to balance crypto exposure with Tether positions.
   identify_trending_coins:
     agent: false
     description: Identify trending coins based on price and volume data
@@ -118,6 +119,7 @@ nodes:
     nodes_depended_on:
     - download_historical_volumes
     nodes_dependent_on:
+    - perform_statistical_analysis
     - identify_trending_coins
     prompt: Preprocess the historical volume data by handling missing values, data
       normalization, and feature scaling.
@@ -127,6 +129,7 @@ nodes:
     name: validate_strategy
     nodes_depended_on:
     - backtest_strategy
+    - hedge_strategy
     nodes_dependent_on:
     - launch_strategy
     prompt: Validate the trading strategy by analyzing performance statistics, risk
