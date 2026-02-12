@@ -1,11 +1,59 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: crypto_quant_trading_strategy_hedging_concurrent
 nodes:
   backtest_strategy:
     agent: false
+    code_node_type: stub
     description: Backtest the trading strategy using historical price and volume data,
       and produce key performance metrics.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DevelopTradingStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for develop_trading_strategy node outputs.\"\"\"\n    strategy_name: str =\
+      \ (\n        Field(..., description=\"Name of the developed trading strategy\"\
+      )\n    )\n    coin_list: List[str] = (\n        Field(..., description=\"List\
+      \ of coin symbols included in the strategy\")\n    )\n    buy_threshold: float\
+      \ = (\n        Field(..., description=\"Threshold value used to trigger a buy\
+      \ signal\")\n    )\n    sell_threshold: float = (\n        Field(..., description=\"\
+      Threshold value used to trigger a sell signal\")\n    )\n    max_drawdown: float\
+      \ = (\n        Field(..., description=\"Maximum acceptable drawdown percentage\
+      \ for the strategy\")\n    )\n    risk_per_trade: float = (\n        Field(...,\
+      \ description=\"Percentage of capital risked per trade\")\n    )\n\n\nclass\
+      \ BacktestStrategyOutput(BaseModel):\n    \"\"\"Pydantic model for backtest_strategy\
+      \ node outputs.\"\"\"\n    cagr: float = (\n        Field(..., description=\"\
+      Compound Annual Growth Rate of the strategy\")\n    )\n    sharpe_ratio: float\
+      \ = (\n        Field(..., description=\"Sharpe Ratio of the strategy's returns\"\
+      )\n    )\n    max_drawdown: float = (\n        Field(..., description=\"Maximum\
+      \ Drawdown percentage during the backtest period\")\n    )\n    total_trades:\
+      \ int = (\n        Field(..., description=\"Total number of executed trades\
+      \ in the backtest\")\n    )\n    net_profit: float = (\n        Field(..., description=\"\
+      Net profit (or loss) in the strategy's base currency\")\n    )\n\n\ndef backtest_strategy(develop_trading_strategy_input:\
+      \ DevelopTradingStrategyOutput, **kwargs) -> BacktestStrategyOutput:\n    \"\
+      \"\"\n    Executes a backtest of the defined trading strategy using historical\
+      \ market\n    data, calculating CAGR, Sharpe Ratio, and drawdown metrics to\
+      \ assess\n    performance.\n\n    Parameters\n    ----------\n    strategy_config\
+      \ : dict\n        Trading strategy configuration containing parameters like\
+      \ coin_list,\n        buy_threshold, sell_threshold, and max_drawdown from\n\
+      \        develop_trading_strategy\n    historical_prices : dict\n        Processed\
+      \ price history for BTC, ETH, and stablecoins formatted as\n        {dates,\
+      \ prices_btc, prices_eth, prices_stable}\n    historical_volumes : dict\n  \
+      \      Volume data for market activity including BTC, ETH, and stablecoin\n\
+      \        volumes over time\n\n    Returns\n    -------\n    dict[str, float\
+      \ | int]\n        Performance metrics including compound annual growth rate,\
+      \ risk-\n        adjusted return ratio, maximum capital loss, total trade count,\
+      \ and\n        net profitability\n\n    Raises\n    ------\n    ValueError\n\
+      \        If historical data timelines don't align with strategy evaluation\n\
+      \        period\n    KeyError\n        If required strategy parameters or market\
+      \ data fields are missing\n\n    Examples\n    --------\n    >>> backtest_strategy({\n\
+      \    ...     'coin_list': ['BTC', 'ETH'],\n    ...     'buy_threshold': 0.05,\n\
+      \    ...     'sell_threshold': 0.02\n    >>> }, price_data, volume_data)\n \
+      \   >>> {\n    {'cagr': 12.4, 'sharpe_ratio': 1.7, 'max_drawdown': -18.2, 'total_trades':\n\
+      \    24, 'net_profit': 12500.0}\n\n    >>> try:\n    ...     backtest_strategy(invalid_config,\
+      \ price_data, volume_data)\n    >>> except ValueError as e:\n    ...     print(e)\n\
+      \    >>> }\n    'Historical price data missing for required evaluation period'\n\
+      \n    \"\"\"\n    return BacktestStrategyOutput(\n        cagr=0.0,\n      \
+      \  sharpe_ratio=0.0,\n        max_drawdown=0.0,\n        total_trades=0,\n \
+      \       net_profit=0.0,\n    )"
     name: backtest_strategy
     nodes_depended_on:
     - develop_trading_strategy
@@ -78,9 +126,59 @@ nodes:
     prompt: Backtest the developed trading strategy with historical data from 'gather_data'.
       Evaluate the trading strategy's performance using metrics such as CAGR, Sharpe
       Ratio, and Max Drawdown.
+    shims: []
   combine_trending_coins:
     agent: false
+    code_node_type: stub
     description: Synthesize price and volume indicators into unified coin selection
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyPriceTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ identify_price_trends node outputs.\"\"\"\n    trending_coins: List[str] =\
+      \ (\n        Field(..., description=\"List of coin identifiers that are identified\
+      \ as price trending.\")\n    )\n    trend_scores: List[float] = (\n        Field(...,\
+      \ description=\"Numerical score representing the strength of the price trend\
+      \ for each coin.\")\n    )\n    num_coins: int = (\n        Field(..., description=\"\
+      Total number of coins identified as trending.\")\n    )\n\n\nclass IdentifyVolumeTrendsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_volume_trends node outputs.\"\"\"\n \
+      \   trending_coin_symbols: List[str] = (\n        Field(..., description=\"\
+      List of cryptocurrency symbols identified as high-volume trending.\")\n    )\n\
+      \    volume_scores: List[float] = (\n        Field(..., description=\"Numerical\
+      \ volume-based score for each trending coin, reflecting relative trading activity.\"\
+      )\n    )\n    volume_thresholds: List[float] = (\n        Field(..., description=\"\
+      Volume threshold values used to determine if a coin qualifies as trending.\"\
+      )\n    )\n\n\nclass CombineTrendingCoinsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for combine_trending_coins node outputs.\"\"\"\n    price_trend_coins:\
+      \ List[str] = (\n        Field(..., description=\"List of price-driven trending\
+      \ coins identified from statistical price analysis\")\n    )\n    volume_trend_coins:\
+      \ List[str] = (\n        Field(..., description=\"List of volume-activated trending\
+      \ coins identified from transaction pattern analysis\")\n    )\n    combined_coins:\
+      \ List[str] = (\n        Field(..., description=\"Prioritized list of coins\
+      \ merged from price and volume trends based on composite scoring\")\n    )\n\
+      \    composite_scores: List[float] = (\n        Field(..., description=\"Numerical\
+      \ composite scores corresponding to each coin in the combined list, reflecting\
+      \ weighted price-volume trend synergy\")\n    )\n\n\ndef combine_trending_coins(identify_price_trends_input:\
+      \ IdentifyPriceTrendsOutput, identify_volume_trends_input: IdentifyVolumeTrendsOutput,\
+      \ **kwargs) -> CombineTrendingCoinsOutput:\n    \"\"\"\n    Merge price and\
+      \ volume-based trending coins into a weighted prioritized list\n\n    Parameters\n\
+      \    ----------\n    price_trend_coins : List[str]\n        Coins identified\
+      \ by price analysis (output of identify_price_trends)\n    price_trend_scores\
+      \ : List[float]\n        Normalized price trend scores from identify_price_trends\n\
+      \    volume_trend_coins : List[str]\n        Coins identified by volume analysis\
+      \ (output of\n        identify_volume_trends)\n    volume_trend_scores : List[float]\n\
+      \        Normalized volume scores from identify_volume_trends\n\n    Returns\n\
+      \    -------\n    Tuple[List[str], List[float], List[str], List[float]]\n  \
+      \      Returns (price_trend_coins, volume_trend_coins, combined_coins,\n   \
+      \     composite_scores) where combined_coins is sorted by composite_scores\n\
+      \n    Raises\n    ------\n    ValueError\n        If input lists contain duplicate\
+      \ coins or mismatched coin-score\n        lengths\n    AttributeError\n    \
+      \    If parent nodes haven't completed their analysis\n\n    Examples\n    --------\n\
+      \    >>> combine_trending_coins(['ADA', 'DOGE'], [0.45],\n    ...          \
+      \       ['ADA', 'XMR'], [0.62, 0.77])\n    {'price_trend_coins': ['ADA', 'DOGE'],\
+      \ 'volume_trend_coins': ['ADA', 'XMR'],\n    'combined_coins': ['ADA', 'XMR',\
+      \ 'DOGE'], 'composite_scores': [0.535, 0.77,\n    0.45]}\n\n    \"\"\"\n   \
+      \ return CombineTrendingCoinsOutput(\n        price_trend_coins=[],\n      \
+      \  volume_trend_coins=[],\n        combined_coins=[],\n        composite_scores=[],\n\
+      \    )"
     name: combine_trending_coins
     nodes_depended_on:
     - identify_price_trends
@@ -142,9 +240,54 @@ nodes:
           list
     prompt: Merge price and volume-based trending coins into a prioritized list using
       composite scoring calculated from trend scores and volume scores.
+    shims: []
   develop_trading_strategy:
     agent: false
+    code_node_type: stub
     description: Develop a trading strategy based on trending coins
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass CombineTrendingCoinsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ combine_trending_coins node outputs.\"\"\"\n    price_trend_coins: List[str]\
+      \ = (\n        Field(..., description=\"List of price-driven trending coins\
+      \ identified from statistical price analysis\")\n    )\n    volume_trend_coins:\
+      \ List[str] = (\n        Field(..., description=\"List of volume-activated trending\
+      \ coins identified from transaction pattern analysis\")\n    )\n    combined_coins:\
+      \ List[str] = (\n        Field(..., description=\"Prioritized list of coins\
+      \ merged from price and volume trends based on composite scoring\")\n    )\n\
+      \    composite_scores: List[float] = (\n        Field(..., description=\"Numerical\
+      \ composite scores corresponding to each coin in the combined list, reflecting\
+      \ weighted price-volume trend synergy\")\n    )\n\n\nclass DevelopTradingStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for develop_trading_strategy node outputs.\"\"\"\n\
+      \    strategy_name: str = (\n        Field(..., description=\"Name of the developed\
+      \ trading strategy\")\n    )\n    coin_list: List[str] = (\n        Field(...,\
+      \ description=\"List of coin symbols included in the strategy\")\n    )\n  \
+      \  buy_threshold: float = (\n        Field(..., description=\"Threshold value\
+      \ used to trigger a buy signal\")\n    )\n    sell_threshold: float = (\n  \
+      \      Field(..., description=\"Threshold value used to trigger a sell signal\"\
+      )\n    )\n    max_drawdown: float = (\n        Field(..., description=\"Maximum\
+      \ acceptable drawdown percentage for the strategy\")\n    )\n    risk_per_trade:\
+      \ float = (\n        Field(..., description=\"Percentage of capital risked per\
+      \ trade\")\n    )\n\n\ndef develop_trading_strategy(combine_trending_coins_input:\
+      \ CombineTrendingCoinsOutput, **kwargs) -> DevelopTradingStrategyOutput:\n \
+      \   \"\"\"\n    Generates a parameterized trading strategy from composite coin\
+      \ trend data\n\n    Parameters\n    ----------\n    combined_coins : List[str]\n\
+      \        Prioritized list of price-volume synergized coins from\n        combine_trending_coins\n\
+      \    composite_scores : List[float]\n        Weighted scores reflecting price-volume\
+      \ trend synergy for each coin\n\n    Returns\n    -------\n    Dict[str, Any]\n\
+      \        Trading strategy configuration with explicit thresholds, risk\n   \
+      \     parameters, and coin selections\n\n    Raises\n    ------\n    ValueError\n\
+      \        If combined_coins has fewer than 3 valid coin entries\n    ValueError\n\
+      \        If composite_scores length does not match combined_coins\n\n    Examples\n\
+      \    --------\n    >>> develop_trading_strategy(['BTC', 'ETH'], [0.85, 0.72])\n\
+      \    >>> {'strategy_name': 'TrendArb-2024', 'max_drawdown': 15.5}\n    {'strategy_name':\
+      \ 'TrendArb-2024', 'coin_list': ['BTC', 'ETH'],\n    'buy_threshold': 0.05,\
+      \ 'sell_threshold': 0.10, 'max_drawdown': 15.5,\n    'risk_per_trade': 2.0}\n\
+      \n    >>> develop_trading_strategy(['ADA'], [0.67])\n    >>> ValueError: combined_coins\
+      \ requires at least 3 valid entries\n    ValueError: combined_coins requires\
+      \ at least 3 valid entries\n\n    \"\"\"\n    return DevelopTradingStrategyOutput(\n\
+      \        strategy_name=\"\",\n        coin_list=[],\n        buy_threshold=0.0,\n\
+      \        sell_threshold=0.0,\n        max_drawdown=0.0,\n        risk_per_trade=0.0,\n\
+      \    )"
     name: develop_trading_strategy
     nodes_depended_on:
     - combine_trending_coins
@@ -207,9 +350,60 @@ nodes:
     prompt: Using the synthesized trending coins list, develop a trading strategy
       that leverages these trends. Establish buy and sell criteria, and leverage any
       market anomalies.
+    shims: []
   download_historical_prices:
     agent: false
+    code_node_type: stub
     description: Retrieve historical price data for BTC, stable and ETH
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GatherDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_data\
+      \ node outputs.\"\"\"\n    price_dates: List[str] = (\n        Field(..., description=\"\
+      List of date strings corresponding to price data points\")\n    )\n    prices:\
+      \ List[float] = (\n        Field(..., description=\"List of historical closing\
+      \ prices for BTC, stable and ETH\")\n    )\n    volume_dates: List[str] = (\n\
+      \        Field(..., description=\"List of date strings corresponding to volume\
+      \ data points\")\n    )\n    volumes: List[float] = (\n        Field(..., description=\"\
+      List of historical trading volumes for BTC, stable and ETH\")\n    )\n\n\nclass\
+      \ DownloadHistoricalPricesOutput(BaseModel):\n    \"\"\"Pydantic model for download_historical_prices\
+      \ node outputs.\"\"\"\n    dates: List[str] = (\n        Field(..., description=\"\
+      List of dates for which price data was retrieved, formatted as ISO 8601 strings\"\
+      )\n    )\n    prices_btc: List[float] = (\n        Field(..., description=\"\
+      List of historical closing prices for BTC corresponding to each date\")\n  \
+      \  )\n    prices_eth: List[float] = (\n        Field(..., description=\"List\
+      \ of historical closing prices for ETH corresponding to each date\")\n    )\n\
+      \    prices_stable: List[float] = (\n        Field(..., description=\"List of\
+      \ historical closing prices for stablecoin (e.g., USDT) corresponding to each\
+      \ date\")\n    )\n\n\ndef download_historical_prices(gather_data_input: GatherDataOutput,\
+      \ **kwargs) -> DownloadHistoricalPricesOutput:\n    \"\"\"\n    Download historical\
+      \ price data for BTC, ETH, and a stablecoin from a public\n    API.\n\n    Parameters\n\
+      \    ----------\n    api_key : str\n        API key for the chosen data provider\
+      \ (e.g., CoinMarketCap).\n    start_date : str\n        ISO 8601 start date\
+      \ for the historical period (inclusive).\n    end_date : str\n        ISO 8601\
+      \ end date for the historical period (inclusive).\n    symbols : List[str]\n\
+      \        List of cryptocurrency symbols to query, e.g., ['BTC', 'ETH',\n   \
+      \     'USDT'].\n\n    Returns\n    -------\n    Dict[str, List[Union[str, float]]]\n\
+      \        A dictionary with keys 'dates', 'prices_btc', 'prices_eth', and\n \
+      \       'prices_stable', each mapping to a list of values aligned by index.\n\
+      \        The 'dates' list contains ISO 8601 date strings; the price lists\n\
+      \        contain the closing price in USD for the corresponding date.\n\n  \
+      \  Raises\n    ------\n    ValueError\n        If any of the input parameters\
+      \ are missing or empty.\n    ConnectionError\n        If the API endpoint cannot\
+      \ be reached.\n    RuntimeError\n        If the API returns an error status\
+      \ or malformed data.\n\n    Examples\n    --------\n    >>> api_key = 'YOUR_CMC_API_KEY'\n\
+      \    >>> start_date = '2023-01-01'\n    >>> end_date = '2023-01-10'\n    >>>\
+      \ symbols = ['BTC', 'ETH', 'USDT']\n    >>> prices = download_historical_prices(api_key,\
+      \ start_date, end_date,\n    symbols)\n    {\n      'dates': ['2023-01-01',\
+      \ '2023-01-02', '2023-01-03', '2023-01-04',\n    '2023-01-05', '2023-01-06',\
+      \ '2023-01-07', '2023-01-08', '2023-01-09',\n    '2023-01-10'],\n      'prices_btc':\
+      \ [32000.1, 32200.5, 31500.0, 33000.2, 33500.7, 34000.0,\n    34500.3, 35000.6,\
+      \ 35500.1, 36000.4],\n      'prices_eth': [2000.5, 2025.3, 1980.7, 2050.2, 2100.6,\
+      \ 2150.1, 2200.4,\n    2250.8, 2300.3, 2350.7],\n      'prices_stable': [1.0,\
+      \ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]\n    }\n\n    >>> # If the API\
+      \ key is invalid or missing, the function raises ValueError\n    >>> download_historical_prices('',\
+      \ '2023-01-01', '2023-01-10', ['BTC'])\n    ValueError: API key must be provided.\n\
+      \n    \"\"\"\n    return DownloadHistoricalPricesOutput(\n        dates=[],\n\
+      \        prices_btc=[],\n        prices_eth=[],\n        prices_stable=[],\n\
+      \    )"
     name: download_historical_prices
     nodes_depended_on:
     - gather_data
@@ -287,10 +481,63 @@ nodes:
           a public API.
     prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical price
       data for BTC, stable and ETH.
+    shims: []
   download_historical_volumes:
     agent: false
+    code_node_type: stub
     description: Retrieve historical volume data for BTC, stable and ETH from a reputable
       data source such as CoinMarketCap or Quandl.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GatherDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_data\
+      \ node outputs.\"\"\"\n    price_dates: List[str] = (\n        Field(..., description=\"\
+      List of date strings corresponding to price data points\")\n    )\n    prices:\
+      \ List[float] = (\n        Field(..., description=\"List of historical closing\
+      \ prices for BTC, stable and ETH\")\n    )\n    volume_dates: List[str] = (\n\
+      \        Field(..., description=\"List of date strings corresponding to volume\
+      \ data points\")\n    )\n    volumes: List[float] = (\n        Field(..., description=\"\
+      List of historical trading volumes for BTC, stable and ETH\")\n    )\n\n\nclass\
+      \ DownloadHistoricalVolumesOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ download_historical_volumes node outputs.\"\"\"\n    btc_dates: List[str]\
+      \ = (\n        Field(..., description=\"List of dates for BTC volume records\"\
+      )\n    )\n    btc_volumes: List[float] = (\n        Field(..., description=\"\
+      List of daily trading volumes for BTC corresponding to btc_dates\")\n    )\n\
+      \    stablecoin_dates: List[str] = (\n        Field(..., description=\"List\
+      \ of dates for stablecoin volume records\")\n    )\n    stablecoin_volumes:\
+      \ List[float] = (\n        Field(..., description=\"List of daily trading volumes\
+      \ for stablecoin corresponding to stablecoin_dates\")\n    )\n    eth_dates:\
+      \ List[str] = (\n        Field(..., description=\"List of dates for ETH volume\
+      \ records\")\n    )\n    eth_volumes: List[float] = (\n        Field(..., description=\"\
+      List of daily trading volumes for ETH corresponding to eth_dates\")\n    )\n\
+      \n\ndef download_historical_volumes(gather_data_input: GatherDataOutput, **kwargs)\
+      \ -> DownloadHistoricalVolumesOutput:\n    \"\"\"\n    Download daily trading\
+      \ volumes for BTC, stablecoin, and ETH from an external\n    API.\n\n    Parameters\n\
+      \    ----------\n    api_key : str\n        API key for authenticating with\
+      \ the data provider.\n    start_date : str\n        ISO 8601 start date (YYYY-MM-DD)\
+      \ for the historical period to\n        retrieve.\n    end_date : str\n    \
+      \    ISO 8601 end date (YYYY-MM-DD) for the historical period to\n        retrieve.\n\
+      \    base_url : str\n        Base endpoint URL of the data provider API.\n\n\
+      \    Returns\n    -------\n    dict\n        A dictionary containing six keys:\
+      \ - btc_dates: List[str] of dates\n        for BTC volume records - btc_volumes:\
+      \ List[float] of daily BTC\n        volumes - stablecoin_dates: List[str] of\
+      \ dates for stablecoin volume\n        records - stablecoin_volumes: List[float]\
+      \ of daily stablecoin\n        volumes - eth_dates: List[str] of dates for ETH\
+      \ volume records -\n        eth_volumes: List[float] of daily ETH volumes\n\n\
+      \    Raises\n    ------\n    ValueError\n        If start_date is after end_date\
+      \ or dates are not in ISO format.\n    ConnectionError\n        If the API endpoint\
+      \ is unreachable or returns a network error.\n    HTTPError\n        If the\
+      \ API returns a non‑200 HTTP status code.\n    KeyError\n        If the expected\
+      \ volume fields are missing from the API response.\n\n    Examples\n    --------\n\
+      \    >>> volumes = download_historical_volumes(\n    ...     api_key='my_api_key',\n\
+      \    ...     start_date='2023-01-01',\n    ...     end_date='2023-01-05',\n\
+      \    ...     base_url='https://api.coinmarketcap.com/v1/'\n    >>> )\n    >>>\
+      \ print(volumes['btc_volumes'])\n    [12000000.0, 11500000.5, 12345678.9, 11000000.0,\
+      \ 11800000.2]\n\n    >>> volumes = download_historical_volumes(\n    ...   \
+      \  api_key='my_api_key',\n    ...     start_date='2023-01-01',\n    ...    \
+      \ end_date='2023-01-01',\n    ...     base_url='https://api.coinmarketcap.com/v1/'\n\
+      \    >>> )\n    >>> print(volumes['eth_dates'])\n    ['2023-01-01']\n\n    \"\
+      \"\"\n    return DownloadHistoricalVolumesOutput(\n        btc_dates=[],\n \
+      \       btc_volumes=[],\n        stablecoin_dates=[],\n        stablecoin_volumes=[],\n\
+      \        eth_dates=[],\n        eth_volumes=[],\n    )"
     name: download_historical_volumes
     nodes_depended_on:
     - gather_data
@@ -383,9 +630,60 @@ nodes:
           an external API.
     prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical volume
       data for BTC, stable and ETH.
+    shims: []
   gather_data:
     agent: false
+    code_node_type: stub
     description: Collect historical price and volume data for BTC, stable and ETH
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GatherDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_data\
+      \ node outputs.\"\"\"\n    price_dates: List[str] = (\n        Field(..., description=\"\
+      List of date strings corresponding to price data points\")\n    )\n    prices:\
+      \ List[float] = (\n        Field(..., description=\"List of historical closing\
+      \ prices for BTC, stable and ETH\")\n    )\n    volume_dates: List[str] = (\n\
+      \        Field(..., description=\"List of date strings corresponding to volume\
+      \ data points\")\n    )\n    volumes: List[float] = (\n        Field(..., description=\"\
+      List of historical trading volumes for BTC, stable and ETH\")\n    )\n\n\ndef\
+      \ gather_data(general_input: str, **kwargs) -> GatherDataOutput:\n    \"\"\"\
+      \n    Download and consolidate historical price and volume data for BTC, stable\n\
+      \    and ETH.\n\n    Parameters\n    ----------\n    source : str\n        The\
+      \ name of the data provider (e.g., 'CoinMarketCap', 'Quandl'). The\n       \
+      \ function selects the appropriate API credentials and endpoints based\n   \
+      \     on this value.\n    start_date : str\n        ISO 8601 start date for\
+      \ the requested data (e.g., '2022-01-01').\n    end_date : str\n        ISO\
+      \ 8601 end date for the requested data (e.g., '2023-01-01').\n    assets : List[str]\n\
+      \        List of asset symbols to fetch (must include 'BTC', 'ETH', and a\n\
+      \        stablecoin symbol such as 'USDT').\n\n    Returns\n    -------\n  \
+      \  Dict[str, List[Union[str, float]]]\n        A dictionary containing four\
+      \ keys: 'price_dates', 'prices',\n        'volume_dates', and 'volumes'. The\
+      \ lists are aligned such that the\n        i-th element of each list corresponds\
+      \ to the same calendar day.\n        Dates are ISO 8601 strings; price and volume\
+      \ values are floats.\n\n    Raises\n    ------\n    ConnectionError\n      \
+      \  Raised if the API endpoint cannot be reached or network issues\n        occur.\n\
+      \    ValueError\n        Raised if required parameters are missing, the asset\
+      \ list does not\n        contain the mandatory symbols, or the date range is\
+      \ invalid.\n    KeyError\n        Raised if the API response does not include\
+      \ data for one or more\n        requested assets.\n\n    Examples\n    --------\n\
+      \    >>> data = gather_data(\n    ...     source='CoinMarketCap',\n    ... \
+      \    start_date='2022-01-01',\n    ...     end_date='2022-01-10',\n    ... \
+      \    assets=['BTC', 'ETH', 'USDT']\n    >>> )\n    {'price_dates': ['2022-01-01',\
+      \ '2022-01-02', '2022-01-03', '2022-01-04',\n    '2022-01-05', '2022-01-06',\
+      \ '2022-01-07', '2022-01-08', '2022-01-09',\n    '2022-01-10'], 'prices': [47000.0,\
+      \ 47500.0, 47200.0, 48000.0, 47800.0,\n    48500.0, 49000.0, 49500.0, 50000.0,\
+      \ 50500.0], 'volume_dates': ['2022-01-01',\n    '2022-01-02', '2022-01-03',\
+      \ '2022-01-04', '2022-01-05', '2022-01-06',\n    '2022-01-07', '2022-01-08',\
+      \ '2022-01-09', '2022-01-10'], 'volumes':\n    [3500000000.0, 3600000000.0,\
+      \ 3550000000.0, 3650000000.0, 3600000000.0,\n    3700000000.0, 3750000000.0,\
+      \ 3800000000.0, 3850000000.0, 3900000000.0]}\n\n    >>> data = gather_data(\n\
+      \    ...     source='Quandl',\n    ...     start_date='2023-06-01',\n    ...\
+      \     end_date='2023-06-05',\n    ...     assets=['BTC', 'ETH', 'USDT']\n  \
+      \  >>> )\n    {'price_dates': ['2023-06-01', '2023-06-02', '2023-06-03', '2023-06-04',\n\
+      \    '2023-06-05'], 'prices': [25000.0, 25100.0, 24900.0, 25200.0, 25300.0],\n\
+      \    'volume_dates': ['2023-06-01', '2023-06-02', '2023-06-03', '2023-06-04',\n\
+      \    '2023-06-05'], 'volumes': [2000000000.0, 2100000000.0, 2050000000.0,\n\
+      \    2150000000.0, 2200000000.0]}\n\n    \"\"\"\n    return GatherDataOutput(\n\
+      \        price_dates=[],\n        prices=[],\n        volume_dates=[],\n   \
+      \     volumes=[],\n    )"
     name: gather_data
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -475,11 +773,69 @@ nodes:
           stable and ETH.
     prompt: Download historical price and volume data for BTC, stable and ETH from
       a reputable data source such as CoinMarketCap or Quandl.
+    shims: []
   hedge_strategy:
     agent: false
+    code_node_type: stub
     description: Creates a Tether‑based hedging plan that specifies how much USDT
       to hold relative to crypto exposure, when to enter and exit hedges, and provides
       a concise strategy summary.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DevelopTradingStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for develop_trading_strategy node outputs.\"\"\"\n    strategy_name: str =\
+      \ (\n        Field(..., description=\"Name of the developed trading strategy\"\
+      )\n    )\n    coin_list: List[str] = (\n        Field(..., description=\"List\
+      \ of coin symbols included in the strategy\")\n    )\n    buy_threshold: float\
+      \ = (\n        Field(..., description=\"Threshold value used to trigger a buy\
+      \ signal\")\n    )\n    sell_threshold: float = (\n        Field(..., description=\"\
+      Threshold value used to trigger a sell signal\")\n    )\n    max_drawdown: float\
+      \ = (\n        Field(..., description=\"Maximum acceptable drawdown percentage\
+      \ for the strategy\")\n    )\n    risk_per_trade: float = (\n        Field(...,\
+      \ description=\"Percentage of capital risked per trade\")\n    )\n\n\nclass\
+      \ HedgeStrategyOutput(BaseModel):\n    \"\"\"Pydantic model for hedge_strategy\
+      \ node outputs.\"\"\"\n    hedging_ratio: float = (\n        Field(..., description=\"\
+      Optimal ratio of Tether to crypto holdings for hedging\")\n    )\n    entry_conditions:\
+      \ str = (\n        Field(..., description=\"Conditions under which the hedge\
+      \ should be initiated\")\n    )\n    exit_conditions: str = (\n        Field(...,\
+      \ description=\"Conditions under which the hedge should be closed\")\n    )\n\
+      \    crypto_exposure: float = (\n        Field(..., description=\"Current value\
+      \ of crypto exposure in USD\")\n    )\n    tether_position: float = (\n    \
+      \    Field(..., description=\"Amount of Tether to hold for hedging in USD\"\
+      )\n    )\n    strategy_summary: str = (\n        Field(..., description=\"Brief\
+      \ summary of the hedging strategy and rationale\")\n    )\n\n\ndef hedge_strategy(develop_trading_strategy_input:\
+      \ DevelopTradingStrategyOutput, **kwargs) -> HedgeStrategyOutput:\n    \"\"\"\
+      \n    Generate a Tether‑based hedging plan for a crypto trading strategy.\n\n\
+      \    Parameters\n    ----------\n    strategy_name : str\n        Name of the\
+      \ trading strategy produced by develop_trading_strategy.\n    coin_list : list[str]\n\
+      \        List of coin symbols included in the strategy.\n    buy_threshold :\
+      \ float\n        Threshold value used to trigger a buy signal in the strategy.\n\
+      \    sell_threshold : float\n        Threshold value used to trigger a sell\
+      \ signal in the strategy.\n    max_drawdown : float\n        Maximum acceptable\
+      \ drawdown percentage for the strategy.\n    risk_per_trade : float\n      \
+      \  Percentage of capital risked per trade.\n\n    Returns\n    -------\n   \
+      \ dict\n        A dictionary containing hedging_ratio, entry_conditions,\n \
+      \       exit_conditions, crypto_exposure, tether_position, and\n        strategy_summary.\n\
+      \n    Raises\n    ------\n    ValueError\n        If any numeric input is non‑positive\
+      \ or if coin_list is empty.\n\n    Examples\n    --------\n    >>> # Example\
+      \ 1: Basic hedging for a high‑risk strategy\n    >>> hedge_strategy(\n    ...\
+      \     strategy_name='MomentumTrader',\n    ...     coin_list=['BTC', 'ETH'],\n\
+      \    ...     buy_threshold=0.05,\n    ...     sell_threshold=0.07,\n    ...\
+      \     max_drawdown=0.20,\n    ...     risk_per_trade=0.02\n    >>> )\n    {'hedging_ratio':\
+      \ 0.15, 'entry_conditions': 'BTC price drops >5% or ETH\n    drops >7%', 'exit_conditions':\
+      \ 'Price recovers 3% from entry or volatility\n    drops below threshold', 'crypto_exposure':\
+      \ 150000.0, 'tether_position':\n    22500.0, 'strategy_summary': 'High‑risk\
+      \ momentum strategy hedged 15% with\n    USDT to cap losses.'}\n\n    >>> #\
+      \ Example 2: Conservative hedge with low volatility\n    >>> hedge_strategy(\n\
+      \    ...     strategy_name='StableTrend',\n    ...     coin_list=['BTC'],\n\
+      \    ...     buy_threshold=0.02,\n    ...     sell_threshold=0.03,\n    ...\
+      \     max_drawdown=0.05,\n    ...     risk_per_trade=0.01\n    >>> )\n    {'hedging_ratio':\
+      \ 0.10, 'entry_conditions': 'BTC drops >2% or 3% for sell',\n    'exit_conditions':\
+      \ 'Price recovers 1% or volatility <0.5%',\n    'crypto_exposure': 50000.0,\
+      \ 'tether_position': 5000.0, 'strategy_summary':\n    'Conservative strategy\
+      \ hedged 10% with USDT to protect against small dips.'}\n\n    \"\"\"\n    return\
+      \ HedgeStrategyOutput(\n        hedging_ratio=0.0,\n        entry_conditions=\"\
+      \",\n        exit_conditions=\"\",\n        crypto_exposure=0.0,\n        tether_position=0.0,\n\
+      \        strategy_summary=\"\",\n    )"
     name: hedge_strategy
     nodes_depended_on:
     - develop_trading_strategy
@@ -571,9 +927,72 @@ nodes:
     prompt: Develop a hedging strategy using Tether (USDT) as the primary hedging
       instrument. Calculate optimal hedging ratios, define entry/exit conditions,
       and structure the portfolio to balance crypto exposure with Tether positions.
+    shims: []
   identify_price_trends:
     agent: false
+    code_node_type: stub
     description: Identify price-driven trending coins using statistical patterns.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass PreprocessPriceDataOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ preprocess_price_data node outputs.\"\"\"\n    dates: List[str] = (\n    \
+      \    Field(..., description=\"List of dates corresponding to the price series\
+      \ in ISO format (YYYY-MM-DD).\")\n    )\n    prices: List[float] = (\n     \
+      \   Field(..., description=\"List of processed price values aligned with the\
+      \ dates list.\")\n    )\n    missing_values_count: int = (\n        Field(...,\
+      \ description=\"Number of missing price entries that were imputed.\")\n    )\n\
+      \    is_normalized: bool = (\n        Field(..., description=\"Indicates whether\
+      \ the price series was normalized to a 0-1 range.\")\n    )\n\n\nclass PerformStatisticalAnalysisOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for perform_statistical_analysis node outputs.\"\"\
+      \"\n    feature_names: List[str] = (\n        Field(..., description=\"Names\
+      \ of the features used in the analysis\")\n    )\n    correlation_coefficients:\
+      \ List[float] = (\n        Field(..., description=\"Pearson correlation coefficients\
+      \ between each pair of features\")\n    )\n    regression_slopes: List[float]\
+      \ = (\n        Field(..., description=\"Slope coefficients from linear regressions\
+      \ for each feature against the target variable\")\n    )\n    regression_intercepts:\
+      \ List[float] = (\n        Field(..., description=\"Intercept terms from linear\
+      \ regressions for each feature\")\n    )\n    regression_r2_scores: List[float]\
+      \ = (\n        Field(..., description=\"Coefficient of determination (R^2) for\
+      \ each regression model\")\n    )\n    regression_p_values: List[float] = (\n\
+      \        Field(..., description=\"p-values for the slope coefficients in each\
+      \ regression model\")\n    )\n    analysis_summary: str = (\n        Field(...,\
+      \ description=\"Concise textual summary of the key statistical findings\")\n\
+      \    )\n\n\nclass IdentifyPriceTrendsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for identify_price_trends node outputs.\"\"\"\n    trending_coins: List[str]\
+      \ = (\n        Field(..., description=\"List of coin identifiers that are identified\
+      \ as price trending.\")\n    )\n    trend_scores: List[float] = (\n        Field(...,\
+      \ description=\"Numerical score representing the strength of the price trend\
+      \ for each coin.\")\n    )\n    num_coins: int = (\n        Field(..., description=\"\
+      Total number of coins identified as trending.\")\n    )\n\n\ndef identify_price_trends(preprocess_price_data_input:\
+      \ PreprocessPriceDataOutput, perform_statistical_analysis_input: PerformStatisticalAnalysisOutput,\
+      \ **kwargs) -> IdentifyPriceTrendsOutput:\n    \"\"\"\n    Identify price‑driven\
+      \ trending coins using statistical analysis.\n\n    Parameters\n    ----------\n\
+      \    preprocessed_prices : Dict[str, List[float]]\n        Dictionary mapping\
+      \ coin identifiers to their normalized price\n        series. Keys are coin\
+      \ symbols (e.g., 'BTC', 'ETH'). Each list aligns\n        with the global date\
+      \ index supplied by `preprocess_price_data`.\n    analysis_results : Dict[str,\
+      \ Any]\n        Output of `perform_statistical_analysis`, containing regression\n\
+      \        slopes, R² scores, and correlation coefficients for each feature\n\
+      \        against the price target. The node uses the regression slope and R²\n\
+      \        to quantify trend strength.\n\n    Returns\n    -------\n    Tuple[List[str],\
+      \ List[float], int]\n        A tuple containing (`trending_coins`, `trend_scores`,\
+      \ `num_coins`).\n        `trending_coins` is ordered by descending `trend_scores`.\n\
+      \n    Raises\n    ------\n    ValueError\n        Raised if any input list is\
+      \ empty or if required keys are missing\n        from the analysis results.\n\
+      \    TypeError\n        Raised if input types do not match the expected signatures\
+      \ (e.g.,\n        prices not numeric).\n\n    Examples\n    --------\n    >>>\
+      \ preprocessed_prices = {\n    ...     'BTC': [0.02, 0.025, 0.03, 0.035, 0.04],\n\
+      \    ...     'ETH': [0.015, 0.017, 0.016, 0.018, 0.02],\n    ...     'USDT':\
+      \ [0.001, 0.0011, 0.0012, 0.0013, 0.0014]\n    >>> }\n    >>> analysis_results\
+      \ = {\n    ...     'regression_slopes': [0.015, 0.005, 0.003],\n    ...    \
+      \ 'regression_r2_scores': [0.92, 0.35, 0.10],\n    ...     'feature_names':\
+      \ ['BTC', 'ETH', 'USDT']\n    >>> }\n    (['BTC'], [0.015], 1)\n\n    >>> preprocessed_prices\
+      \ = {\n    ...     'BTC': [0.02, 0.021, 0.023, 0.026, 0.03],\n    ...     'ETH':\
+      \ [0.015, 0.016, 0.0165, 0.017, 0.018]\n    >>> }\n    >>> analysis_results\
+      \ = {\n    ...     'regression_slopes': [0.010, 0.004],\n    ...     'regression_r2_scores':\
+      \ [0.85, 0.60],\n    ...     'feature_names': ['BTC', 'ETH']\n    >>> }\n  \
+      \  (['BTC', 'ETH'], [0.010, 0.004], 2)\n\n    \"\"\"\n    return IdentifyPriceTrendsOutput(\n\
+      \        trending_coins=[],\n        trend_scores=[],\n        num_coins=0,\n\
+      \    )"
     name: identify_price_trends
     nodes_depended_on:
     - preprocess_price_data
@@ -648,9 +1067,72 @@ nodes:
         summary: Identify price‑driven trending coins using statistical analysis.
     prompt: Use preprocessed price data and statistical analysis to identify price
       appreciating coins.
+    shims: []
   identify_volume_trends:
     agent: false
+    code_node_type: stub
     description: Identify volume-activated trending coins using transaction patterns.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass PreprocessVolumeDataOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ preprocess_volume_data node outputs.\"\"\"\n    dates: List[str] = (\n   \
+      \     Field(..., description=\"List of dates corresponding to each volume entry.\"\
+      )\n    )\n    raw_volumes: List[float] = (\n        Field(..., description=\"\
+      Original volume values after missing value handling.\")\n    )\n    normalized_volumes:\
+      \ List[float] = (\n        Field(..., description=\"Volume values scaled to\
+      \ a 0-1 range or standardized to mean 0 and std 1.\")\n    )\n    missing_value_count:\
+      \ int = (\n        Field(..., description=\"Number of missing volume entries\
+      \ that were imputed or removed.\")\n    )\n    is_valid: bool = (\n        Field(...,\
+      \ description=\"Indicates whether the preprocessing produced a dataset suitable\
+      \ for analysis.\")\n    )\n\n\nclass PerformStatisticalAnalysisOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for perform_statistical_analysis node outputs.\"\"\
+      \"\n    feature_names: List[str] = (\n        Field(..., description=\"Names\
+      \ of the features used in the analysis\")\n    )\n    correlation_coefficients:\
+      \ List[float] = (\n        Field(..., description=\"Pearson correlation coefficients\
+      \ between each pair of features\")\n    )\n    regression_slopes: List[float]\
+      \ = (\n        Field(..., description=\"Slope coefficients from linear regressions\
+      \ for each feature against the target variable\")\n    )\n    regression_intercepts:\
+      \ List[float] = (\n        Field(..., description=\"Intercept terms from linear\
+      \ regressions for each feature\")\n    )\n    regression_r2_scores: List[float]\
+      \ = (\n        Field(..., description=\"Coefficient of determination (R^2) for\
+      \ each regression model\")\n    )\n    regression_p_values: List[float] = (\n\
+      \        Field(..., description=\"p-values for the slope coefficients in each\
+      \ regression model\")\n    )\n    analysis_summary: str = (\n        Field(...,\
+      \ description=\"Concise textual summary of the key statistical findings\")\n\
+      \    )\n\n\nclass IdentifyVolumeTrendsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for identify_volume_trends node outputs.\"\"\"\n    trending_coin_symbols:\
+      \ List[str] = (\n        Field(..., description=\"List of cryptocurrency symbols\
+      \ identified as high-volume trending.\")\n    )\n    volume_scores: List[float]\
+      \ = (\n        Field(..., description=\"Numerical volume-based score for each\
+      \ trending coin, reflecting relative trading activity.\")\n    )\n    volume_thresholds:\
+      \ List[float] = (\n        Field(..., description=\"Volume threshold values\
+      \ used to determine if a coin qualifies as trending.\")\n    )\n\n\ndef identify_volume_trends(preprocess_volume_data_input:\
+      \ PreprocessVolumeDataOutput, perform_statistical_analysis_input: PerformStatisticalAnalysisOutput,\
+      \ **kwargs) -> IdentifyVolumeTrendsOutput:\n    \"\"\"\n    Identify volume-activated\
+      \ trending coins based on preprocessed volume data\n    and statistical analysis.\n\
+      \n    Parameters\n    ----------\n    volume_data : dict\n        Output from\
+      \ preprocess_volume_data containing normalized volume\n        series and related\
+      \ metadata.\n    analysis_results : dict\n        Output from perform_statistical_analysis\
+      \ containing correlation\n        coefficients, regression slopes, etc.\n\n\
+      \    Returns\n    -------\n    dict\n        Dictionary with keys: - trending_coin_symbols\
+      \ (List[str]) -\n        volume_scores (List[float]) - volume_thresholds (List[float])\n\
+      \n    Raises\n    ------\n    ValueError\n        Raised when volume_data or\
+      \ analysis_results are missing required\n        fields or contain inconsistent\
+      \ lengths.\n\n    Examples\n    --------\n    >>> result = identify_volume_trends(\n\
+      \    ...     volume_data={\n    ...         'normalized_volumes': [120.0, 150.0,\
+      \ 80.0],\n    ...         'dates': ['2024-01-01', '2024-01-02', '2024-01-03']\n\
+      \    ...     },\n    ...     analysis_results={\n    ...         'correlation_coefficients':\
+      \ [0.92, 0.88, 0.45],\n    ...         'feature_names': ['volume', 'price']\n\
+      \    ...     }\n    >>> )\n    {\n      \"trending_coin_symbols\": [\"BTC\"\
+      , \"ETH\"],\n      \"volume_scores\": [0.92, 0.88],\n      \"volume_thresholds\"\
+      : [100.0, 130.0]\n    }\n\n    >>> result = identify_volume_trends(\n    ...\
+      \     volume_data={\n    ...         'normalized_volumes': [200.0, 210.0],\n\
+      \    ...         'dates': ['2024-01-01', '2024-01-02']\n    ...     },\n   \
+      \ ...     analysis_results={\n    ...         'correlation_coefficients': [0.95,\
+      \ 0.93],\n    ...         'feature_names': ['volume', 'price']\n    ...    \
+      \ }\n    >>> )\n    {\n      \"trending_coin_symbols\": [\"BTC\"],\n      \"\
+      volume_scores\": [0.95],\n      \"volume_thresholds\": [190.0]\n    }\n\n  \
+      \  \"\"\"\n    return IdentifyVolumeTrendsOutput(\n        trending_coin_symbols=[],\n\
+      \        volume_scores=[],\n        volume_thresholds=[],\n    )"
     name: identify_volume_trends
     nodes_depended_on:
     - preprocess_volume_data
@@ -726,11 +1208,81 @@ nodes:
           data and statistical analysis.
     prompt: Use preprocessed volume data and statistical analysis to identify high-volume
       trending coins.
+    shims: []
   launch_strategy:
     agent: false
+    code_node_type: stub
     description: Launch the validated trading strategy by allocating capital, setting
       entry/exit conditions, applying hedging ratios, defining cumulative loss limits,
       and specifying monitoring metrics.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ValidateStrategyOutput(BaseModel):\n    \"\"\"Pydantic model for validate_strategy\
+      \ node outputs.\"\"\"\n    is_valid: bool = (\n        Field(..., description=\"\
+      Whether the strategy meets predefined viability thresholds.\")\n    )\n    cagr:\
+      \ float = (\n        Field(..., description=\"Compound Annual Growth Rate of\
+      \ the strategy.\")\n    )\n    sharpe_ratio: float = (\n        Field(..., description=\"\
+      Sharpe Ratio indicating risk-adjusted return.\")\n    )\n    max_drawdown: float\
+      \ = (\n        Field(..., description=\"Maximum observed drawdown percentage.\"\
+      )\n    )\n    net_profit: float = (\n        Field(..., description=\"Total\
+      \ net profit in USD after hedging.\")\n    )\n    total_trades: int = (\n  \
+      \      Field(..., description=\"Total number of trades executed.\")\n    )\n\
+      \n\nclass HedgeStrategyOutput(BaseModel):\n    \"\"\"Pydantic model for hedge_strategy\
+      \ node outputs.\"\"\"\n    hedging_ratio: float = (\n        Field(..., description=\"\
+      Optimal ratio of Tether to crypto holdings for hedging\")\n    )\n    entry_conditions:\
+      \ str = (\n        Field(..., description=\"Conditions under which the hedge\
+      \ should be initiated\")\n    )\n    exit_conditions: str = (\n        Field(...,\
+      \ description=\"Conditions under which the hedge should be closed\")\n    )\n\
+      \    crypto_exposure: float = (\n        Field(..., description=\"Current value\
+      \ of crypto exposure in USD\")\n    )\n    tether_position: float = (\n    \
+      \    Field(..., description=\"Amount of Tether to hold for hedging in USD\"\
+      )\n    )\n    strategy_summary: str = (\n        Field(..., description=\"Brief\
+      \ summary of the hedging strategy and rationale\")\n    )\n\n\nclass LaunchStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for launch_strategy node outputs.\"\"\"\n    initial_capital:\
+      \ float = (\n        Field(..., description=\"Initial capital allocated to the\
+      \ trading strategy expressed in USD.\")\n    )\n    entry_condition: str = (\n\
+      \        Field(..., description=\"Textual description of the criteria to enter\
+      \ a position.\")\n    )\n    exit_condition: str = (\n        Field(..., description=\"\
+      Textual description of the criteria to exit a position.\")\n    )\n    hedging_ratio:\
+      \ float = (\n        Field(..., description=\"Ratio of Tether (USDT) used for\
+      \ hedging relative to crypto exposure.\")\n    )\n    risk_limit_cumulative_loss:\
+      \ float = (\n        Field(..., description=\"Maximum cumulative loss in USD\
+      \ allowed before the strategy is halted.\")\n    )\n    monitoring_metrics:\
+      \ List[str] = (\n        Field(..., description=\"List of metrics that will\
+      \ be monitored during strategy execution (e.g., P&L, Sharpe Ratio, Drawdown).\"\
+      )\n    )\n\n\ndef launch_strategy(validate_strategy_input: ValidateStrategyOutput,\
+      \ hedge_strategy_input: HedgeStrategyOutput, **kwargs) -> LaunchStrategyOutput:\n\
+      \    \"\"\"\n    Instantiate a trading strategy configuration from validated\
+      \ metrics and\n    hedging parameters.\n\n    Parameters\n    ----------\n \
+      \   is_valid : bool\n        Flag indicating whether the strategy passed validation.\n\
+      \    cagr : float\n        Compound Annual Growth Rate of the validated strategy.\n\
+      \    sharpe_ratio : float\n        Risk-adjusted return metric of the strategy.\n\
+      \    max_drawdown : float\n        Maximum drawdown observed during backtesting.\n\
+      \    net_profit : float\n        Net profit after hedging, in USD.\n    total_trades\
+      \ : int\n        Number of trades executed during backtesting.\n    hedging_ratio\
+      \ : float\n        Optimal ratio of Tether to crypto holdings determined by\n\
+      \        hedge_strategy.\n    entry_conditions : str\n        Conditions under\
+      \ which the hedge should be initiated (from\n        hedge_strategy).\n    exit_conditions\
+      \ : str\n        Conditions under which the hedge should be closed (from\n \
+      \       hedge_strategy).\n\n    Returns\n    -------\n    dict\n        Dictionary\
+      \ containing configuration keys: initial_capital,\n        entry_condition,\
+      \ exit_condition, hedging_ratio,\n        risk_limit_cumulative_loss, monitoring_metrics.\n\
+      \n    Raises\n    ------\n    ValueError\n        Raised if the strategy is\
+      \ invalid (is_valid is False).\n\n    Examples\n    --------\n    >>> config\
+      \ = launch_strategy(\n    ...     is_valid=True,\n    ...     cagr=0.35,\n \
+      \   ...     sharpe_ratio=2.1,\n    ...     max_drawdown=0.15,\n    ...     net_profit=120000.0,\n\
+      \    ...     total_trades=240,\n    ...     hedging_ratio=0.25,\n    ...   \
+      \  entry_conditions='BTC price rises 3% above 7-day SMA',\n    ...     exit_conditions='BTC\
+      \ falls 2% below 7-day SMA'\n    {'initial_capital': 100000.0, 'entry_condition':\
+      \ 'BTC price rises 3% above\n    7-day SMA', 'exit_condition': 'BTC falls 2%\
+      \ below 7-day SMA',\n    'hedging_ratio': 0.25, 'risk_limit_cumulative_loss':\
+      \ 20000.0,\n    'monitoring_metrics': ['P&L', 'Sharpe Ratio', 'Drawdown']}\n\
+      \n    >>> launch_strategy(is_valid=False, cagr=0.0, sharpe_ratio=0.0,\n    max_drawdown=0.0,\
+      \ net_profit=0.0, total_trades=0, hedging_ratio=0.0,\n    entry_conditions='',\
+      \ exit_conditions='')\n    ValueError: Strategy validation failed. Cannot launch\
+      \ strategy.\n\n    \"\"\"\n    return LaunchStrategyOutput(\n        initial_capital=0.0,\n\
+      \        entry_condition=\"\",\n        exit_condition=\"\",\n        hedging_ratio=0.0,\n\
+      \        risk_limit_cumulative_loss=0.0,\n        monitoring_metrics=[],\n \
+      \   )"
     name: launch_strategy
     nodes_depended_on:
     - validate_strategy
@@ -827,11 +1379,83 @@ nodes:
     prompt: Based on the validated trading strategy, launch the trading strategy with
       an appropriate initial capital allocation. Ensure that the strategy is properly
       parameterized, risk-managed, and monitored for performance.
+    shims: []
   perform_statistical_analysis:
     agent: false
+    code_node_type: stub
     description: Conduct regression and correlation analyses on cleaned price and
       volume datasets, producing numerical metrics and descriptive summaries for downstream
       trend identification.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass PreprocessPriceDataOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ preprocess_price_data node outputs.\"\"\"\n    dates: List[str] = (\n    \
+      \    Field(..., description=\"List of dates corresponding to the price series\
+      \ in ISO format (YYYY-MM-DD).\")\n    )\n    prices: List[float] = (\n     \
+      \   Field(..., description=\"List of processed price values aligned with the\
+      \ dates list.\")\n    )\n    missing_values_count: int = (\n        Field(...,\
+      \ description=\"Number of missing price entries that were imputed.\")\n    )\n\
+      \    is_normalized: bool = (\n        Field(..., description=\"Indicates whether\
+      \ the price series was normalized to a 0-1 range.\")\n    )\n\n\nclass PreprocessVolumeDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for preprocess_volume_data node outputs.\"\"\"\n \
+      \   dates: List[str] = (\n        Field(..., description=\"List of dates corresponding\
+      \ to each volume entry.\")\n    )\n    raw_volumes: List[float] = (\n      \
+      \  Field(..., description=\"Original volume values after missing value handling.\"\
+      )\n    )\n    normalized_volumes: List[float] = (\n        Field(..., description=\"\
+      Volume values scaled to a 0-1 range or standardized to mean 0 and std 1.\")\n\
+      \    )\n    missing_value_count: int = (\n        Field(..., description=\"\
+      Number of missing volume entries that were imputed or removed.\")\n    )\n \
+      \   is_valid: bool = (\n        Field(..., description=\"Indicates whether the\
+      \ preprocessing produced a dataset suitable for analysis.\")\n    )\n\n\nclass\
+      \ PerformStatisticalAnalysisOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ perform_statistical_analysis node outputs.\"\"\"\n    feature_names: List[str]\
+      \ = (\n        Field(..., description=\"Names of the features used in the analysis\"\
+      )\n    )\n    correlation_coefficients: List[float] = (\n        Field(...,\
+      \ description=\"Pearson correlation coefficients between each pair of features\"\
+      )\n    )\n    regression_slopes: List[float] = (\n        Field(..., description=\"\
+      Slope coefficients from linear regressions for each feature against the target\
+      \ variable\")\n    )\n    regression_intercepts: List[float] = (\n        Field(...,\
+      \ description=\"Intercept terms from linear regressions for each feature\")\n\
+      \    )\n    regression_r2_scores: List[float] = (\n        Field(..., description=\"\
+      Coefficient of determination (R^2) for each regression model\")\n    )\n   \
+      \ regression_p_values: List[float] = (\n        Field(..., description=\"p-values\
+      \ for the slope coefficients in each regression model\")\n    )\n    analysis_summary:\
+      \ str = (\n        Field(..., description=\"Concise textual summary of the key\
+      \ statistical findings\")\n    )\n\n\ndef perform_statistical_analysis(preprocess_price_data_input:\
+      \ PreprocessPriceDataOutput, preprocess_volume_data_input: PreprocessVolumeDataOutput,\
+      \ **kwargs) -> PerformStatisticalAnalysisOutput:\n    \"\"\"\n    Perform regression\
+      \ and correlation analyses on cleaned price and volume\n    datasets to extract\
+      \ statistical metrics for trend detection.\n\n    Parameters\n    ----------\n\
+      \    price_data : dict\n        Dictionary returned by `preprocess_price_data`,\
+      \ containing keys\n        `dates`, `prices`, `missing_values_count`, and `is_normalized`.\n\
+      \    volume_data : dict\n        Dictionary returned by `preprocess_volume_data`,\
+      \ containing keys\n        `dates`, `raw_volumes`, `normalized_volumes`, `missing_value_count`,\n\
+      \        and `is_valid`.\n    target_feature : str\n        Name of the feature\
+      \ to predict (default: `'prices'`). It must exist\n        in `price_data`.\n\
+      \n    Returns\n    -------\n    dict\n        A dictionary mapping the output\
+      \ field names to their computed\n        values, matching the node's output_structure.\n\
+      \n    Raises\n    ------\n    ValueError\n        If `price_data` or `volume_data`\
+      \ is missing required keys, or if\n        `target_feature` is not present.\n\
+      \    RuntimeError\n        If regression or correlation calculation fails due\
+      \ to insufficient\n        data.\n\n    Examples\n    --------\n    >>> # Mock\
+      \ preprocessed price data\n    >>> price_data = {\n    ...     'dates': ['2024-01-01',\
+      \ '2024-01-02', '2024-01-03'],\n    ...     'prices': [100.0, 102.5, 101.0],\n\
+      \    ...     'missing_values_count': 0,\n    ...     'is_normalized': True\n\
+      \    >>> }\n    >>> # Mock preprocessed volume data\n    >>> volume_data = {\n\
+      \    ...     'dates': ['2024-01-01', '2024-01-02', '2024-01-03'],\n    ... \
+      \    'raw_volumes': [5000, 5200, 5100],\n    ...     'normalized_volumes': [0.0,\
+      \ 0.2, 0.1],\n    ...     'missing_value_count': 0,\n    ...     'is_valid':\
+      \ True\n    >>> }\n    {feature_names: [prices, normalized_volumes], correlation_coefficients:\n\
+      \    [0.98], regression_slopes: [2.5, -0.5], regression_intercepts: [50.0, 1.0],\n\
+      \    regression_r2_scores: [0.97, 0.9], regression_p_values: [0.001, 0.05],\n\
+      \    analysis_summary: Strong positive correlation between price and volume;\n\
+      \    price increases with volume.}\n\n    >>> # Using default target feature\n\
+      \    >>> result = perform_statistical_analysis(price_data, volume_data)\n  \
+      \  >>> print(result['analysis_summary'])\n    \"Strong positive correlation\
+      \ between price and volume; price increases with\n    volume.\"\n\n    \"\"\"\
+      \n    return PerformStatisticalAnalysisOutput(\n        feature_names=[],\n\
+      \        correlation_coefficients=[],\n        regression_slopes=[],\n     \
+      \   regression_intercepts=[],\n        regression_r2_scores=[],\n        regression_p_values=[],\n\
+      \        analysis_summary=\"\",\n    )"
     name: perform_statistical_analysis
     nodes_depended_on:
     - preprocess_price_data
@@ -925,10 +1549,61 @@ nodes:
           volume datasets to extract statistical metrics for trend detection.
     prompt: Perform statistical analysis (e.g. regression, correlation) on the preprocessed
       price and volume data to identify trends and patterns.
+    shims: []
   preprocess_price_data:
     agent: false
+    code_node_type: stub
     description: Clean and transform price data for analysis by imputing missing values,
       normalizing price series, and scaling features.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DownloadHistoricalPricesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for download_historical_prices node outputs.\"\"\"\n    dates: List[str] =\
+      \ (\n        Field(..., description=\"List of dates for which price data was\
+      \ retrieved, formatted as ISO 8601 strings\")\n    )\n    prices_btc: List[float]\
+      \ = (\n        Field(..., description=\"List of historical closing prices for\
+      \ BTC corresponding to each date\")\n    )\n    prices_eth: List[float] = (\n\
+      \        Field(..., description=\"List of historical closing prices for ETH\
+      \ corresponding to each date\")\n    )\n    prices_stable: List[float] = (\n\
+      \        Field(..., description=\"List of historical closing prices for stablecoin\
+      \ (e.g., USDT) corresponding to each date\")\n    )\n\n\nclass PreprocessPriceDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for preprocess_price_data node outputs.\"\"\"\n  \
+      \  dates: List[str] = (\n        Field(..., description=\"List of dates corresponding\
+      \ to the price series in ISO format (YYYY-MM-DD).\")\n    )\n    prices: List[float]\
+      \ = (\n        Field(..., description=\"List of processed price values aligned\
+      \ with the dates list.\")\n    )\n    missing_values_count: int = (\n      \
+      \  Field(..., description=\"Number of missing price entries that were imputed.\"\
+      )\n    )\n    is_normalized: bool = (\n        Field(..., description=\"Indicates\
+      \ whether the price series was normalized to a 0-1 range.\")\n    )\n\n\ndef\
+      \ preprocess_price_data(download_historical_prices_input: DownloadHistoricalPricesOutput,\
+      \ **kwargs) -> PreprocessPriceDataOutput:\n    \"\"\"\n    Preprocesses raw\
+      \ historical price data for downstream analysis.\n\n    Parameters\n    ----------\n\
+      \    dates : List[str]\n        List of ISO‑formatted dates (YYYY-MM-DD) for\
+      \ which price data was\n        retrieved.\n    prices_btc : List[float]\n \
+      \       List of closing prices for BTC aligned with the dates list.\n    prices_eth\
+      \ : List[float]\n        List of closing prices for ETH aligned with the dates\
+      \ list.\n    prices_stable : List[float]\n        List of closing prices for\
+      \ the chosen stablecoin (e.g., USDT)\n        aligned with the dates list.\n\
+      \n    Returns\n    -------\n    Dict[str, Any]\n        A dictionary containing\
+      \ the cleaned and transformed price series,\n        including dates, a unified\
+      \ price list, the count of imputed values,\n        and a flag indicating whether\
+      \ normalization was performed.\n\n    Raises\n    ------\n    ValueError\n \
+      \       If the input price lists are of unequal length or contain\n        non‑numeric\
+      \ entries.\n    TypeError\n        If any input parameter is not of the expected\
+      \ type.\n\n    Examples\n    --------\n    >>> # Example 1: Simple preprocessing\
+      \ with no missing values\n    >>> output = preprocess_price_data(\n    ... \
+      \    dates=['2023-01-01', '2023-01-02'],\n    ...     prices_btc=[20000.0, 21000.0],\n\
+      \    ...     prices_eth=[1200.0, 1250.0],\n    ...     prices_stable=[1.0, 1.0]\n\
+      \    >>> )\n    >>> print(output)\n    {'dates': ['2023-01-01', '2023-01-02'],\
+      \ 'prices': [20000.0, 21000.0],\n    'missing_values_count': 0, 'is_normalized':\
+      \ False}\n\n    >>> # Example 2: Handling missing values and normalizing\n \
+      \   >>> output = preprocess_price_data(\n    ...     dates=['2023-01-01', '2023-01-02',\
+      \ '2023-01-03'],\n    ...     prices_btc=[20000.0, None, 21000.0],\n    ...\
+      \     prices_eth=[1200.0, 1250.0, None],\n    ...     prices_stable=[1.0, 1.0,\
+      \ 1.0]\n    >>> )\n    >>> print(output)\n    {'dates': ['2023-01-01', '2023-01-02',\
+      \ '2023-01-03'], 'prices': [20000.0,\n    20000.0, 21000.0], 'missing_values_count':\
+      \ 2, 'is_normalized': True}\n\n    \"\"\"\n    return PreprocessPriceDataOutput(\n\
+      \        dates=[],\n        prices=[],\n        missing_values_count=0,\n  \
+      \      is_normalized=False,\n    )"
     name: preprocess_price_data
     nodes_depended_on:
     - download_historical_prices
@@ -1007,11 +1682,72 @@ nodes:
         summary: Preprocesses raw historical price data for downstream analysis.
     prompt: Preprocess the historical price data by handling missing values, data
       normalization, and feature scaling.
+    shims: []
   preprocess_volume_data:
     agent: false
+    code_node_type: stub
     description: Clean and transform volume data for analysis by removing missing
       entries, normalizing volumes to a common scale, and preparing the dataset for
       downstream statistical analysis.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DownloadHistoricalVolumesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for download_historical_volumes node outputs.\"\"\"\n    btc_dates: List[str]\
+      \ = (\n        Field(..., description=\"List of dates for BTC volume records\"\
+      )\n    )\n    btc_volumes: List[float] = (\n        Field(..., description=\"\
+      List of daily trading volumes for BTC corresponding to btc_dates\")\n    )\n\
+      \    stablecoin_dates: List[str] = (\n        Field(..., description=\"List\
+      \ of dates for stablecoin volume records\")\n    )\n    stablecoin_volumes:\
+      \ List[float] = (\n        Field(..., description=\"List of daily trading volumes\
+      \ for stablecoin corresponding to stablecoin_dates\")\n    )\n    eth_dates:\
+      \ List[str] = (\n        Field(..., description=\"List of dates for ETH volume\
+      \ records\")\n    )\n    eth_volumes: List[float] = (\n        Field(..., description=\"\
+      List of daily trading volumes for ETH corresponding to eth_dates\")\n    )\n\
+      \n\nclass PreprocessVolumeDataOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ preprocess_volume_data node outputs.\"\"\"\n    dates: List[str] = (\n   \
+      \     Field(..., description=\"List of dates corresponding to each volume entry.\"\
+      )\n    )\n    raw_volumes: List[float] = (\n        Field(..., description=\"\
+      Original volume values after missing value handling.\")\n    )\n    normalized_volumes:\
+      \ List[float] = (\n        Field(..., description=\"Volume values scaled to\
+      \ a 0-1 range or standardized to mean 0 and std 1.\")\n    )\n    missing_value_count:\
+      \ int = (\n        Field(..., description=\"Number of missing volume entries\
+      \ that were imputed or removed.\")\n    )\n    is_valid: bool = (\n        Field(...,\
+      \ description=\"Indicates whether the preprocessing produced a dataset suitable\
+      \ for analysis.\")\n    )\n\n\ndef preprocess_volume_data(download_historical_volumes_input:\
+      \ DownloadHistoricalVolumesOutput, **kwargs) -> PreprocessVolumeDataOutput:\n\
+      \    \"\"\"\n    Preprocesses historical cryptocurrency volume data by handling\
+      \ missing\n    values and normalizing the series.\n\n    Parameters\n    ----------\n\
+      \    btc_dates : List[str]\n        ISO 8601 formatted dates for BTC volume\
+      \ records.\n    btc_volumes : List[float]\n        Daily trading volumes for\
+      \ BTC aligned with btc_dates.\n    stablecoin_dates : List[str]\n        ISO\
+      \ 8601 formatted dates for stablecoin volume records.\n    stablecoin_volumes\
+      \ : List[float]\n        Daily trading volumes for stablecoins aligned with\
+      \ stablecoin_dates.\n    eth_dates : List[str]\n        ISO 8601 formatted dates\
+      \ for ETH volume records.\n    eth_volumes : List[float]\n        Daily trading\
+      \ volumes for ETH aligned with eth_dates.\n    normalization_method : str\n\
+      \        Method used for scaling volumes: 'minmax' for 0-1 scaling or\n    \
+      \    'standard' for mean‑zero/std‑one standardization.\n\n    Returns\n    -------\n\
+      \    Dict[str, Any]\n        A dictionary containing cleaned dates, raw volumes,\
+      \ normalized\n        volumes, missing value count, and a validity flag.\n\n\
+      \    Raises\n    ------\n    ValueError\n        If any of the date lists are\
+      \ empty or lengths of dates and volumes\n        do not match.\n    TypeError\n\
+      \        If volume inputs contain non‑numeric values.\n\n    Examples\n    --------\n\
+      \    >>> result = preprocess_volume_data(\n    ...     btc_dates=['2023-01-01',\
+      \ '2023-01-02'],\n    ...     btc_volumes=[1000.0, 1100.0],\n    ...     stablecoin_dates=['2023-01-01',\
+      \ '2023-01-02'],\n    ...     stablecoin_volumes=[2000.0, 2100.0],\n    ...\
+      \     eth_dates=['2023-01-01', '2023-01-02'],\n    ...     eth_volumes=[1500.0,\
+      \ 1600.0],\n    ...     normalization_method='minmax')\n    {'dates': ['2023-01-01',\
+      \ '2023-01-02'], 'raw_volumes': [1000.0, 1100.0,\n    2000.0, 2100.0, 1500.0,\
+      \ 1600.0], 'normalized_volumes': [0.0, 0.1, 0.7, 0.8,\n    0.4, 0.5], 'missing_value_count':\
+      \ 0, 'is_valid': True}\n\n    >>> result = preprocess_volume_data(\n    ...\
+      \     btc_dates=['2023-01-01', None],\n    ...     btc_volumes=[1000.0, None],\n\
+      \    ...     stablecoin_dates=['2023-01-01'],\n    ...     stablecoin_volumes=[2000.0],\n\
+      \    ...     eth_dates=['2023-01-01'],\n    ...     eth_volumes=[1500.0],\n\
+      \    ...     normalization_method='standard')\n    {'dates': ['2023-01-01'],\
+      \ 'raw_volumes': [1000.0, 2000.0, 1500.0],\n    'normalized_volumes': [-1.0,\
+      \ 1.0, 0.0], 'missing_value_count': 2,\n    'is_valid': True}\n\n    \"\"\"\n\
+      \    return PreprocessVolumeDataOutput(\n        dates=[],\n        raw_volumes=[],\n\
+      \        normalized_volumes=[],\n        missing_value_count=0,\n        is_valid=False,\n\
+      \    )"
     name: preprocess_volume_data
     nodes_depended_on:
     - download_historical_volumes
@@ -1103,10 +1839,79 @@ nodes:
           values and normalizing the series.
     prompt: Preprocess the historical volume data by handling missing values, data
       normalization, and feature scaling.
+    shims: []
   validate_strategy:
     agent: false
+    code_node_type: stub
     description: Validate the trading strategy's feasibility by evaluating key performance
       and risk metrics from backtesting and hedging outputs.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BacktestStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for backtest_strategy node outputs.\"\"\"\n    cagr:\
+      \ float = (\n        Field(..., description=\"Compound Annual Growth Rate of\
+      \ the strategy\")\n    )\n    sharpe_ratio: float = (\n        Field(..., description=\"\
+      Sharpe Ratio of the strategy's returns\")\n    )\n    max_drawdown: float =\
+      \ (\n        Field(..., description=\"Maximum Drawdown percentage during the\
+      \ backtest period\")\n    )\n    total_trades: int = (\n        Field(..., description=\"\
+      Total number of executed trades in the backtest\")\n    )\n    net_profit: float\
+      \ = (\n        Field(..., description=\"Net profit (or loss) in the strategy's\
+      \ base currency\")\n    )\n\n\nclass HedgeStrategyOutput(BaseModel):\n    \"\
+      \"\"Pydantic model for hedge_strategy node outputs.\"\"\"\n    hedging_ratio:\
+      \ float = (\n        Field(..., description=\"Optimal ratio of Tether to crypto\
+      \ holdings for hedging\")\n    )\n    entry_conditions: str = (\n        Field(...,\
+      \ description=\"Conditions under which the hedge should be initiated\")\n  \
+      \  )\n    exit_conditions: str = (\n        Field(..., description=\"Conditions\
+      \ under which the hedge should be closed\")\n    )\n    crypto_exposure: float\
+      \ = (\n        Field(..., description=\"Current value of crypto exposure in\
+      \ USD\")\n    )\n    tether_position: float = (\n        Field(..., description=\"\
+      Amount of Tether to hold for hedging in USD\")\n    )\n    strategy_summary:\
+      \ str = (\n        Field(..., description=\"Brief summary of the hedging strategy\
+      \ and rationale\")\n    )\n\n\nclass ValidateStrategyOutput(BaseModel):\n  \
+      \  \"\"\"Pydantic model for validate_strategy node outputs.\"\"\"\n    is_valid:\
+      \ bool = (\n        Field(..., description=\"Whether the strategy meets predefined\
+      \ viability thresholds.\")\n    )\n    cagr: float = (\n        Field(..., description=\"\
+      Compound Annual Growth Rate of the strategy.\")\n    )\n    sharpe_ratio: float\
+      \ = (\n        Field(..., description=\"Sharpe Ratio indicating risk-adjusted\
+      \ return.\")\n    )\n    max_drawdown: float = (\n        Field(..., description=\"\
+      Maximum observed drawdown percentage.\")\n    )\n    net_profit: float = (\n\
+      \        Field(..., description=\"Total net profit in USD after hedging.\")\n\
+      \    )\n    total_trades: int = (\n        Field(..., description=\"Total number\
+      \ of trades executed.\")\n    )\n\n\ndef validate_strategy(backtest_strategy_input:\
+      \ BacktestStrategyOutput, hedge_strategy_input: HedgeStrategyOutput, **kwargs)\
+      \ -> ValidateStrategyOutput:\n    \"\"\"\n    Validates the trading strategy\
+      \ by analyzing performance statistics, risk\n    metrics, and profit/loss projections\
+      \ from backtest and hedge outputs.\n\n    Parameters\n    ----------\n    backtest_result\
+      \ : dict\n        Dictionary output from backtest_strategy containing performance\n\
+      \        metrics such as cagr, sharpe_ratio, max_drawdown, net_profit, and\n\
+      \        total_trades.\n    hedge_result : dict\n        Dictionary from hedge_strategy\
+      \ containing hedging metrics such as\n        hedging_ratio, entry_conditions,\
+      \ exit_conditions, crypto_exposure,\n        tether_position, and strategy_summary.\n\
+      \n    Returns\n    -------\n    dict\n        Dictionary with keys is_valid,\
+      \ cagr, sharpe_ratio, max_drawdown,\n        net_profit, total_trades matching\
+      \ the output_structure.\n\n    Raises\n    ------\n    ValueError\n        Raised\
+      \ if required metrics are missing or of incorrect type in\n        either input\
+      \ dictionary.\n\n    Examples\n    --------\n    >>> backtest_result = {\n \
+      \   ...     'cagr': 0.12,\n    ...     'sharpe_ratio': 1.5,\n    ...     'max_drawdown':\
+      \ 0.20,\n    ...     'net_profit': 48000.0,\n    ...     'total_trades': 150\n\
+      \    >>> }\n    >>> hedge_result = {\n    ...     'hedging_ratio': 0.30,\n \
+      \   ...     'entry_conditions': 'price > 0.01',\n    ...     'exit_conditions':\
+      \ 'price < 0.009',\n    ...     'crypto_exposure': 100000.0,\n    ...     'tether_position':\
+      \ 30000.0,\n    ...     'strategy_summary': 'Tether hedge to limit crypto exposure.'\n\
+      \    >>> }\n    >>> validate_strategy(backtest_result, hedge_result)\n    {\n\
+      \      'is_valid': True,\n      'cagr': 0.12,\n      'sharpe_ratio': 1.5,\n\
+      \      'max_drawdown': 0.20,\n      'net_profit': 48000.0,\n      'total_trades':\
+      \ 150\n    }\n\n    >>> backtest_result = {\n    ...     'cagr': 0.05,\n   \
+      \ ...     'sharpe_ratio': 0.8,\n    ...     'max_drawdown': 0.35,\n    ... \
+      \    'net_profit': -12000.0,\n    ...     'total_trades': 80\n    >>> }\n  \
+      \  >>> hedge_result = {\n    ...     'hedging_ratio': 0.20,\n    ...     'entry_conditions':\
+      \ 'price > 0.02',\n    ...     'exit_conditions': 'price < 0.018',\n    ...\
+      \     'crypto_exposure': 50000.0,\n    ...     'tether_position': 10000.0,\n\
+      \    ...     'strategy_summary': 'Limited hedge due to high drawdown.'\n   \
+      \ >>> }\n    >>> validate_strategy(backtest_result, hedge_result)\n    {\n \
+      \     'is_valid': False,\n      'cagr': 0.05,\n      'sharpe_ratio': 0.8,\n\
+      \      'max_drawdown': 0.35,\n      'net_profit': -12000.0,\n      'total_trades':\
+      \ 80\n    }\n\n    \"\"\"\n    return ValidateStrategyOutput(\n        is_valid=False,\n\
+      \        cagr=0.0,\n        sharpe_ratio=0.0,\n        max_drawdown=0.0,\n \
+      \       net_profit=0.0,\n        total_trades=0,\n    )"
     name: validate_strategy
     nodes_depended_on:
     - backtest_strategy
@@ -1200,3 +2005,4 @@ nodes:
     prompt: Validate the trading strategy by analyzing performance statistics, risk
       metrics, and profit/loss projections. Determine the viability of the trading
       strategy.
+    shims: []
