@@ -1,0 +1,123 @@
+dag_type: plain_text
+description: Develop a quant trading strategy for BTC, stable and ETH
+name: crypto_quant_trading_strategy
+nodes:
+  backtest_strategy:
+    agent: false
+    description: Backtest the trading strategy with historical data
+    name: backtest_strategy
+    nodes_depended_on:
+    - develop_trading_strategy
+    nodes_dependent_on:
+    - validate_strategy
+    prompt: Backtest the developed trading strategy with historical data from 'gather_data'.
+      Evaluate the trading strategy's performance using metrics such as CAGR, Sharpe
+      Ratio, and Max Drawdown.
+  develop_trading_strategy:
+    agent: false
+    description: Develop a trading strategy based on trending coins
+    name: develop_trading_strategy
+    nodes_depended_on:
+    - identify_trending_coins
+    nodes_dependent_on:
+    - backtest_strategy
+    prompt: Using the trending coins identified, develop a trading strategy that leverages
+      these trends. Establish buy and sell criteria, and leverage any market anomalies.
+  download_historical_prices:
+    agent: false
+    description: Retrive historical price data for BTC, stable and ETH
+    name: download_historical_prices
+    nodes_depended_on:
+    - gather_data
+    nodes_dependent_on:
+    - preprocess_price_data
+    prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical price
+      data for BTC, stable and ETH. Ensure the data is in a suitable format for the
+      next step 'preprocess_price_data'.
+  download_historical_volumes:
+    agent: false
+    description: Retrive historical volume data for BTC, stable and ETH
+    name: download_historical_volumes
+    nodes_depended_on:
+    - gather_data
+    nodes_dependent_on:
+    - preprocess_volume_data
+    prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical volume
+      data for BTC, stable and ETH. Ensure the data is in a suitable format for the
+      next step 'preprocess_volume_data'.
+  gather_data:
+    agent: false
+    description: Collect historical price and volume data for BTC, stable and ETH
+    name: gather_data
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - download_historical_prices
+    - download_historical_volumes
+    prompt: Download historical price and volume data for BTC, stable and ETH from
+      a reputable data source such as CoinMarketCap or Quandl. Use the 'download_historical_prices'
+      and 'download_historical_volumes' nodes to retrieve the data.
+  identify_trending_coins:
+    agent: false
+    description: Identify trending coins based on price and volume data
+    name: identify_trending_coins
+    nodes_depended_on:
+    - preprocess_price_data
+    - preprocess_volume_data
+    nodes_dependent_on:
+    - develop_trading_strategy
+    prompt: Use the preprocessed and analyzed data to identify trending coins. Develop
+      a strategy for selecting coins that meet certain criteria (e.g. price appreciation,
+      trading volume).
+  launch_strategy:
+    agent: false
+    description: Launch the validated trading strategy
+    name: launch_strategy
+    nodes_depended_on:
+    - validate_strategy
+    nodes_dependent_on: []
+    prompt: Based on the validated trading strategy, launch the trading strategy with
+      an appropriate initial capital allocation. Ensure that the strategy is properly
+      parameterized, risk-managed, and monitored for performance.
+  perform_statistical_analysis:
+    agent: false
+    description: Perform statistical analysis on price and volume data
+    name: perform_statistical_analysis
+    nodes_depended_on:
+    - preprocess_price_data
+    - preprocess_volume_data
+    nodes_dependent_on:
+    - identify_trending_coins
+    prompt: Perform statistical analysis (e.g. regression, correlation) on the preprocessed
+      price and volume data to identify trends and patterns. This will be used for
+      the next step 'identify_trending_coins'.
+  preprocess_price_data:
+    agent: false
+    description: Clean and transform price data for analysis
+    name: preprocess_price_data
+    nodes_depended_on:
+    - download_historical_prices
+    nodes_dependent_on:
+    - perform_statistical_analysis
+    prompt: Preprocess the historical price data by handling missing values, data
+      normalization, and feature scaling. This will be used for the next step 'perform_statistical_analysis'.
+  preprocess_volume_data:
+    agent: false
+    description: Clean and transform volume data for analysis
+    name: preprocess_volume_data
+    nodes_depended_on:
+    - download_historical_volumes
+    nodes_dependent_on:
+    - identify_trending_coins
+    prompt: Preprocess the historical volume data by handling missing values, data
+      normalization, and feature scaling. This will be used for the next step 'identify_trending_coins'.
+  validate_strategy:
+    agent: false
+    description: Validate the trading strategy's feasibility
+    name: validate_strategy
+    nodes_depended_on:
+    - backtest_strategy
+    nodes_dependent_on:
+    - launch_strategy
+    prompt: Validate the trading strategy by analyzing performance statistics, risk
+      metrics, and profit/loss projections. Determine the viability of the trading
+      strategy.
