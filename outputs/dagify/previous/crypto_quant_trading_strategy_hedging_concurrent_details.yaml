@@ -1,15 +1,31 @@
-dag_type: plain_text
-description: Refactored workflow with concurrent identification of trending coins
-  via price and volume analysis
+dag_type: typed
+description: Generated workflow from UI.
 name: crypto_quant_trading_strategy_hedging_concurrent
 nodes:
   backtest_strategy:
     agent: false
-    description: Backtest the trading strategy with historical data
+    description: Backtest the trading strategy using historical price and volume data,
+      and produce key performance metrics.
     name: backtest_strategy
     nodes_depended_on:
     - develop_trading_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Compound Annual Growth Rate of the strategy
+      key: cagr
+      type: float
+    - description: Sharpe Ratio of the strategy's returns
+      key: sharpe_ratio
+      type: float
+    - description: Maximum Drawdown percentage during the backtest period
+      key: max_drawdown
+      type: float
+    - description: Total number of executed trades in the backtest
+      key: total_trades
+      type: int
+    - description: Net profit (or loss) in the strategy's base currency
+      key: net_profit
+      type: float
     prompt: Backtest the developed trading strategy with historical data from 'gather_data'.
       Evaluate the trading strategy's performance using metrics such as CAGR, Sharpe
       Ratio, and Max Drawdown.
@@ -21,6 +37,23 @@ nodes:
     - identify_price_trends
     - identify_volume_trends
     nodes_dependent_on: []
+    output_structure:
+    - description: List of price-driven trending coins identified from statistical
+        price analysis
+      key: price_trend_coins
+      type: List[str]
+    - description: List of volume-activated trending coins identified from transaction
+        pattern analysis
+      key: volume_trend_coins
+      type: List[str]
+    - description: Prioritized list of coins merged from price and volume trends based
+        on composite scoring
+      key: combined_coins
+      type: List[str]
+    - description: Numerical composite scores corresponding to each coin in the combined
+        list, reflecting weighted price-volume trend synergy
+      key: composite_scores
+      type: List[float]
     prompt: Merge price and volume-based trending coins into a prioritized list using
       composite scoring.
   develop_trading_strategy:
@@ -30,6 +63,25 @@ nodes:
     nodes_depended_on:
     - combine_trending_coins
     nodes_dependent_on: []
+    output_structure:
+    - description: Name of the developed trading strategy
+      key: strategy_name
+      type: str
+    - description: List of coin symbols included in the strategy
+      key: coin_list
+      type: List[str]
+    - description: Threshold value used to trigger a buy signal
+      key: buy_threshold
+      type: float
+    - description: Threshold value used to trigger a sell signal
+      key: sell_threshold
+      type: float
+    - description: Maximum acceptable drawdown percentage for the strategy
+      key: max_drawdown
+      type: float
+    - description: Percentage of capital risked per trade
+      key: risk_per_trade
+      type: float
     prompt: Using the synthesized trending coins list, develop a trading strategy
       that leverages these trends. Establish buy and sell criteria, and leverage any
       market anomalies.
@@ -40,15 +92,52 @@ nodes:
     nodes_depended_on:
     - gather_data
     nodes_dependent_on: []
+    output_structure:
+    - description: List of dates for which price data was retrieved, formatted as
+        ISO 8601 strings
+      key: dates
+      type: List[str]
+    - description: List of historical closing prices for BTC corresponding to each
+        date
+      key: prices_btc
+      type: List[float]
+    - description: List of historical closing prices for ETH corresponding to each
+        date
+      key: prices_eth
+      type: List[float]
+    - description: List of historical closing prices for stablecoin (e.g., USDT) corresponding
+        to each date
+      key: prices_stable
+      type: List[float]
     prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical price
       data for BTC, stable and ETH.
   download_historical_volumes:
     agent: false
-    description: Retrieve historical volume data for BTC, stable and ETH
+    description: Retrieve historical volume data for BTC, stable and ETH from a reputable
+      data source such as CoinMarketCap or Quandl.
     name: download_historical_volumes
     nodes_depended_on:
     - gather_data
     nodes_dependent_on: []
+    output_structure:
+    - description: List of dates for BTC volume records
+      key: btc_dates
+      type: List[str]
+    - description: List of daily trading volumes for BTC corresponding to btc_dates
+      key: btc_volumes
+      type: List[float]
+    - description: List of dates for stablecoin volume records
+      key: stablecoin_dates
+      type: List[str]
+    - description: List of daily trading volumes for stablecoin corresponding to stablecoin_dates
+      key: stablecoin_volumes
+      type: List[float]
+    - description: List of dates for ETH volume records
+      key: eth_dates
+      type: List[str]
+    - description: List of daily trading volumes for ETH corresponding to eth_dates
+      key: eth_volumes
+      type: List[float]
     prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical volume
       data for BTC, stable and ETH.
   gather_data:
@@ -57,85 +146,242 @@ nodes:
     name: gather_data
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: List of date strings corresponding to price data points
+      key: price_dates
+      type: List[str]
+    - description: List of historical closing prices for BTC, stable and ETH
+      key: prices
+      type: List[float]
+    - description: List of date strings corresponding to volume data points
+      key: volume_dates
+      type: List[str]
+    - description: List of historical trading volumes for BTC, stable and ETH
+      key: volumes
+      type: List[float]
     prompt: Download historical price and volume data for BTC, stable and ETH from
       a reputable data source such as CoinMarketCap or Quandl.
   hedge_strategy:
     agent: false
-    description: Develop a Tether-based hedging strategy to mitigate losses
+    description: Develop a Tether-based hedging strategy to mitigate losses by determining
+      hedging ratios, entry and exit conditions, and portfolio structure.
     name: hedge_strategy
     nodes_depended_on:
     - develop_trading_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Optimal ratio of Tether to crypto holdings for hedging
+      key: hedging_ratio
+      type: float
+    - description: Conditions under which the hedge should be initiated
+      key: entry_conditions
+      type: str
+    - description: Conditions under which the hedge should be closed
+      key: exit_conditions
+      type: str
+    - description: Current value of crypto exposure in USD
+      key: crypto_exposure
+      type: float
+    - description: Amount of Tether to hold for hedging in USD
+      key: tether_position
+      type: float
+    - description: Brief summary of the hedging strategy and rationale
+      key: strategy_summary
+      type: str
     prompt: Develop a hedging strategy using Tether (USDT) as the primary hedging
       instrument. Calculate optimal hedging ratios, define entry/exit conditions,
       and structure the portfolio to balance crypto exposure with Tether positions.
   identify_price_trends:
     agent: false
-    description: Identify price-driven trending coins using statistical patterns
+    description: Identify price-driven trending coins using statistical patterns.
     name: identify_price_trends
     nodes_depended_on:
     - preprocess_price_data
     - perform_statistical_analysis
     nodes_dependent_on: []
+    output_structure:
+    - description: List of coin identifiers that are identified as price trending.
+      key: trending_coins
+      type: List[str]
+    - description: Numerical score representing the strength of the price trend for
+        each coin.
+      key: trend_scores
+      type: List[float]
+    - description: Total number of coins identified as trending.
+      key: num_coins
+      type: int
     prompt: Use preprocessed price data and statistical analysis to identify price
       appreciating coins.
   identify_volume_trends:
     agent: false
-    description: Identify volume-activated trending coins using transaction patterns
+    description: Identify volume-activated trending coins using transaction patterns.
     name: identify_volume_trends
     nodes_depended_on:
     - preprocess_volume_data
     - perform_statistical_analysis
     nodes_dependent_on: []
+    output_structure:
+    - description: List of cryptocurrency symbols identified as high-volume trending.
+      key: trending_coin_symbols
+      type: List[str]
+    - description: Numerical volume-based score for each trending coin, reflecting
+        relative trading activity.
+      key: volume_scores
+      type: List[float]
+    - description: Volume threshold values used to determine if a coin qualifies as
+        trending.
+      key: volume_thresholds
+      type: List[float]
     prompt: Use preprocessed volume data and statistical analysis to identify high-volume
       trending coins.
   launch_strategy:
     agent: false
-    description: Launch the validated trading strategy
+    description: Launch the validated trading strategy by allocating capital, setting
+      parameters, defining risk limits, and establishing monitoring metrics.
     name: launch_strategy
     nodes_depended_on:
     - validate_strategy
     - hedge_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Initial capital allocated to the trading strategy expressed in
+        USD.
+      key: initial_capital
+      type: float
+    - description: Textual description of the criteria to enter a position.
+      key: entry_condition
+      type: str
+    - description: Textual description of the criteria to exit a position.
+      key: exit_condition
+      type: str
+    - description: Ratio of Tether (USDT) used for hedging relative to crypto exposure.
+      key: hedging_ratio
+      type: float
+    - description: Maximum cumulative loss in USD allowed before the strategy is halted.
+      key: risk_limit_cumulative_loss
+      type: float
+    - description: List of metrics that will be monitored during strategy execution
+        (e.g., P&L, Sharpe Ratio, Drawdown).
+      key: monitoring_metrics
+      type: List[str]
     prompt: Based on the validated trading strategy, launch the trading strategy with
       an appropriate initial capital allocation. Ensure that the strategy is properly
       parameterized, risk-managed, and monitored for performance.
   perform_statistical_analysis:
     agent: false
-    description: Perform statistical analysis on price and volume data
+    description: Conduct regression and correlation analyses on cleaned price and
+      volume datasets, producing numerical metrics and descriptive summaries for downstream
+      trend identification.
     name: perform_statistical_analysis
     nodes_depended_on:
     - preprocess_price_data
     - preprocess_volume_data
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of the features used in the analysis
+      key: feature_names
+      type: List[str]
+    - description: Pearson correlation coefficients between each pair of features
+      key: correlation_coefficients
+      type: List[float]
+    - description: Slope coefficients from linear regressions for each feature against
+        the target variable
+      key: regression_slopes
+      type: List[float]
+    - description: Intercept terms from linear regressions for each feature
+      key: regression_intercepts
+      type: List[float]
+    - description: Coefficient of determination (R^2) for each regression model
+      key: regression_r2_scores
+      type: List[float]
+    - description: p-values for the slope coefficients in each regression model
+      key: regression_p_values
+      type: List[float]
+    - description: Concise textual summary of the key statistical findings
+      key: analysis_summary
+      type: str
     prompt: Perform statistical analysis (e.g. regression, correlation) on the preprocessed
       price and volume data to identify trends and patterns.
   preprocess_price_data:
     agent: false
-    description: Clean and transform price data for analysis
+    description: Clean and transform price data for analysis by imputing missing values,
+      normalizing price series, and scaling features.
     name: preprocess_price_data
     nodes_depended_on:
     - download_historical_prices
     nodes_dependent_on: []
+    output_structure:
+    - description: List of dates corresponding to the price series in ISO format (YYYY-MM-DD).
+      key: dates
+      type: List[str]
+    - description: List of processed price values aligned with the dates list.
+      key: prices
+      type: List[float]
+    - description: Number of missing price entries that were imputed.
+      key: missing_values_count
+      type: int
+    - description: Indicates whether the price series was normalized to a 0-1 range.
+      key: is_normalized
+      type: bool
     prompt: Preprocess the historical price data by handling missing values, data
       normalization, and feature scaling.
   preprocess_volume_data:
     agent: false
-    description: Clean and transform volume data for analysis
+    description: Clean and transform volume data for analysis by removing missing
+      entries, normalizing volumes to a common scale, and preparing the dataset for
+      downstream statistical analysis.
     name: preprocess_volume_data
     nodes_depended_on:
     - download_historical_volumes
     nodes_dependent_on: []
+    output_structure:
+    - description: List of dates corresponding to each volume entry.
+      key: dates
+      type: List[str]
+    - description: Original volume values after missing value handling.
+      key: raw_volumes
+      type: List[float]
+    - description: Volume values scaled to a 0-1 range or standardized to mean 0 and
+        std 1.
+      key: normalized_volumes
+      type: List[float]
+    - description: Number of missing volume entries that were imputed or removed.
+      key: missing_value_count
+      type: int
+    - description: Indicates whether the preprocessing produced a dataset suitable
+        for analysis.
+      key: is_valid
+      type: bool
     prompt: Preprocess the historical volume data by handling missing values, data
       normalization, and feature scaling.
   validate_strategy:
     agent: false
-    description: Validate the trading strategy's feasibility
+    description: Validate the trading strategy's feasibility by evaluating key performance
+      and risk metrics from backtesting and hedging outputs.
     name: validate_strategy
     nodes_depended_on:
     - backtest_strategy
     - hedge_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the strategy meets predefined viability thresholds.
+      key: is_valid
+      type: bool
+    - description: Compound Annual Growth Rate of the strategy.
+      key: cagr
+      type: float
+    - description: Sharpe Ratio indicating risk-adjusted return.
+      key: sharpe_ratio
+      type: float
+    - description: Maximum observed drawdown percentage.
+      key: max_drawdown
+      type: float
+    - description: Total net profit in USD after hedging.
+      key: net_profit
+      type: float
+    - description: Total number of trades executed.
+      key: total_trades
+      type: int
     prompt: Validate the trading strategy by analyzing performance statistics, risk
       metrics, and profit/loss projections. Determine the viability of the trading
       strategy.
