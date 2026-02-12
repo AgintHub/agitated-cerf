@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Workflow to implement a hedged crypto trading strategy using Tether as
-  the hedging instrument
-name: crypto_quant_trading_strategy_hedging
+description: Refactored workflow with concurrent identification of trending coins
+  via price and volume analysis
+name: crypto_quant_trading_strategy_hedging_concurrent
 nodes:
   backtest_strategy:
     agent: false
@@ -9,30 +9,37 @@ nodes:
     name: backtest_strategy
     nodes_depended_on:
     - develop_trading_strategy
-    nodes_dependent_on:
-    - validate_strategy
+    nodes_dependent_on: []
     prompt: Backtest the developed trading strategy with historical data from 'gather_data'.
       Evaluate the trading strategy's performance using metrics such as CAGR, Sharpe
       Ratio, and Max Drawdown.
+  combine_trending_coins:
+    agent: false
+    description: Synthesize price and volume indicators into unified coin selection
+    name: combine_trending_coins
+    nodes_depended_on:
+    - identify_price_trends
+    - identify_volume_trends
+    nodes_dependent_on: []
+    prompt: Merge price and volume-based trending coins into a prioritized list using
+      composite scoring.
   develop_trading_strategy:
     agent: false
     description: Develop a trading strategy based on trending coins
     name: develop_trading_strategy
     nodes_depended_on:
-    - identify_trending_coins
-    nodes_dependent_on:
-    - hedge_strategy
-    - backtest_strategy
-    prompt: Using the trending coins identified, develop a trading strategy that leverages
-      these trends. Establish buy and sell criteria, and leverage any market anomalies.
+    - combine_trending_coins
+    nodes_dependent_on: []
+    prompt: Using the synthesized trending coins list, develop a trading strategy
+      that leverages these trends. Establish buy and sell criteria, and leverage any
+      market anomalies.
   download_historical_prices:
     agent: false
     description: Retrieve historical price data for BTC, stable and ETH
     name: download_historical_prices
     nodes_depended_on:
     - gather_data
-    nodes_dependent_on:
-    - preprocess_price_data
+    nodes_dependent_on: []
     prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical price
       data for BTC, stable and ETH.
   download_historical_volumes:
@@ -41,8 +48,7 @@ nodes:
     name: download_historical_volumes
     nodes_depended_on:
     - gather_data
-    nodes_dependent_on:
-    - preprocess_volume_data
+    nodes_dependent_on: []
     prompt: Use a suitable API (e.g. CoinMarketCap API) to download historical volume
       data for BTC, stable and ETH.
   gather_data:
@@ -50,9 +56,7 @@ nodes:
     description: Collect historical price and volume data for BTC, stable and ETH
     name: gather_data
     nodes_depended_on: []
-    nodes_dependent_on:
-    - download_historical_prices
-    - download_historical_volumes
+    nodes_dependent_on: []
     prompt: Download historical price and volume data for BTC, stable and ETH from
       a reputable data source such as CoinMarketCap or Quandl.
   hedge_strategy:
@@ -61,24 +65,30 @@ nodes:
     name: hedge_strategy
     nodes_depended_on:
     - develop_trading_strategy
-    nodes_dependent_on:
-    - launch_strategy
+    nodes_dependent_on: []
     prompt: Develop a hedging strategy using Tether (USDT) as the primary hedging
       instrument. Calculate optimal hedging ratios, define entry/exit conditions,
       and structure the portfolio to balance crypto exposure with Tether positions.
-  identify_trending_coins:
+  identify_price_trends:
     agent: false
-    description: Identify trending coins based on price and volume data
-    name: identify_trending_coins
+    description: Identify price-driven trending coins using statistical patterns
+    name: identify_price_trends
     nodes_depended_on:
     - preprocess_price_data
+    - perform_statistical_analysis
+    nodes_dependent_on: []
+    prompt: Use preprocessed price data and statistical analysis to identify price
+      appreciating coins.
+  identify_volume_trends:
+    agent: false
+    description: Identify volume-activated trending coins using transaction patterns
+    name: identify_volume_trends
+    nodes_depended_on:
     - preprocess_volume_data
     - perform_statistical_analysis
-    nodes_dependent_on:
-    - develop_trading_strategy
-    prompt: Use the preprocessed and analyzed data to identify trending coins. Develop
-      a strategy for selecting coins that meet certain criteria (e.g. price appreciation,
-      trading volume).
+    nodes_dependent_on: []
+    prompt: Use preprocessed volume data and statistical analysis to identify high-volume
+      trending coins.
   launch_strategy:
     agent: false
     description: Launch the validated trading strategy
@@ -97,8 +107,7 @@ nodes:
     nodes_depended_on:
     - preprocess_price_data
     - preprocess_volume_data
-    nodes_dependent_on:
-    - identify_trending_coins
+    nodes_dependent_on: []
     prompt: Perform statistical analysis (e.g. regression, correlation) on the preprocessed
       price and volume data to identify trends and patterns.
   preprocess_price_data:
@@ -107,9 +116,7 @@ nodes:
     name: preprocess_price_data
     nodes_depended_on:
     - download_historical_prices
-    nodes_dependent_on:
-    - perform_statistical_analysis
-    - identify_trending_coins
+    nodes_dependent_on: []
     prompt: Preprocess the historical price data by handling missing values, data
       normalization, and feature scaling.
   preprocess_volume_data:
@@ -118,9 +125,7 @@ nodes:
     name: preprocess_volume_data
     nodes_depended_on:
     - download_historical_volumes
-    nodes_dependent_on:
-    - perform_statistical_analysis
-    - identify_trending_coins
+    nodes_dependent_on: []
     prompt: Preprocess the historical volume data by handling missing values, data
       normalization, and feature scaling.
   validate_strategy:
@@ -130,8 +135,7 @@ nodes:
     nodes_depended_on:
     - backtest_strategy
     - hedge_strategy
-    nodes_dependent_on:
-    - launch_strategy
+    nodes_dependent_on: []
     prompt: Validate the trading strategy by analyzing performance statistics, risk
       metrics, and profit/loss projections. Determine the viability of the trading
       strategy.
